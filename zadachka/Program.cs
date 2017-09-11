@@ -1072,9 +1072,7 @@ namespace zadachka
             public DerivativeMap dMap = new DerivativeMap();
             public MathParser(string expression)
             {
-                funcMap.Add("sin", a =>  {
-                    return Math.Sin(a * Math.PI / 180);
-                });
+                funcMap.Add("sin", a => Math.Sin(a * Math.PI / 180));                
                 funcMap.Add("cos", a => Math.Cos(a * Math.PI / 180));
                 funcMap.Add("ln", a => Math.Log(a));
                 funcMap.Add("arcsin", a => Math.Asin(a));
