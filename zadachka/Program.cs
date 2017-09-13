@@ -79,7 +79,7 @@ namespace zadachka
             }
 
 
-            public void tryMakeSimpleConstOrVar(bool flag)
+            public void tryMakeSimpleConstOrVar()
             {
                 if (leftOperation != null && rightOperation != null)
                 {
@@ -89,7 +89,9 @@ namespace zadachka
                         value = calculate();
                         leftOperation = null;
                         rightOperation = null;
-                        flag = true;
+                        sign = ' ';
+                        searchFunction = null;
+                        makeSimple();
                     }
                     else if (leftOperation.value == 0 && leftOperation.rightOperation == null && leftOperation.variable == null)
                     {
@@ -99,7 +101,7 @@ namespace zadachka
                             leftOperation = null;
                             rightOperation = null;
                             copy(buffOp);
-                            flag = true;                           
+                            makeSimple();
                         }
                         else if (sign == '-')
                         {
@@ -108,14 +110,15 @@ namespace zadachka
                             rightOperation = null;
                             buffOp.changeSign();
                             copy(buffOp);
-                            flag = true;
+                            makeSimple();
                         }
                         else if (sign == '*')
                         {
                             value = calculate();
                             leftOperation = null;
                             rightOperation = null;
-                            flag = true;
+                            sign = ' ';
+                            makeSimple();
                         }                           
                     }
                     else if (rightOperation.value == 0 && rightOperation.rightOperation == null && rightOperation.variable == null)
@@ -126,14 +129,15 @@ namespace zadachka
                             leftOperation = null;
                             rightOperation = null;
                             copy(buffOp);
-                            flag = true;
+                            makeSimple();
                         }
                         else if (sign == '*')
                         {
                             value = calculate();
                             leftOperation = null;
                             rightOperation = null;
-                            flag = true;
+                            sign = ' ';
+                            makeSimple();
                         }
                     } 
                 } 
@@ -143,16 +147,17 @@ namespace zadachka
                     {
                         value = calculate();
                         rightOperation = null;
-                        flag = true;
+                        searchFunction = null;
+                        makeSimple();
                     }
                 }
                 if (leftOperation != null)
                 {
-                    leftOperation.tryMakeSimpleConstOrVar(flag);
+                    leftOperation.tryMakeSimpleConstOrVar();
                 }
                 if (rightOperation != null)
                 {
-                    rightOperation.tryMakeSimpleConstOrVar(flag);
+                    rightOperation.tryMakeSimpleConstOrVar();
                 }              
             }
 
@@ -265,63 +270,61 @@ namespace zadachka
                 }
             }
 
-            public void checkMultiplier(bool flag)
+            public void checkMultiplier()
             {
                 if (sign == '*')
                 {
-                        if (leftOperation.value == 0 && leftOperation.variable == null && leftOperation.rightOperation == null)
-                        {
-                            leftOperation = null;
-                            rightOperation = null;
-                            sign = ' ';
-                            flag = true;
-                        }
-                        else if (leftOperation.value == 1)
-                        {
-                            leftOperation.value = 0;
-                            sign = '+';
-                            flag = true;
-                        }
-                        else if (leftOperation.rightOperation == null && leftOperation.variable == null
-                        && rightOperation.rightOperation != null)
-                        {
-                            rightOperation.multiplication(leftOperation.value);
-                            leftOperation.value = 0;
-                            sign = '+';
-                            flag = true;
-                        }
-                        else if (rightOperation.value == 0 && rightOperation.variable == null && leftOperation.rightOperation == null)
-                        {
-                            leftOperation = null;
-                            rightOperation = null;
-                            sign = ' ';
-                            flag = true;
-                        }
-                        else if (rightOperation.value == 1)
-                        {
-                            leftOperation.value = 0;
-                            sign = '+';
-                            flag = true;
-                        }
-                        else if (rightOperation.rightOperation == null && rightOperation.variable == null
-                           && leftOperation.rightOperation != null)
-                        {
-                            leftOperation.multiplication(rightOperation.value);
-                            flag = true;
-                        }
+                    if (leftOperation.value == 0 && leftOperation.variable == null && leftOperation.rightOperation == null)
+                    {
+                        leftOperation = null;
+                        rightOperation = null;
+                        sign = ' ';
+                        makeSimple();
                     }
-                if (flag == false)
-                {
+                    else if (leftOperation.value == 1)
+                    {
+                        leftOperation.value = 0;
+                        sign = '+';
+                        makeSimple();
+                    }
+                    else if (leftOperation.rightOperation == null && leftOperation.variable == null
+                    && rightOperation.rightOperation != null)
+                    {
+                        rightOperation.multiplication(leftOperation.value);
+                        leftOperation.value = 0;
+                        sign = '+';
+                        makeSimple();
+                    }
+                    else if (rightOperation.value == 0 && rightOperation.variable == null && leftOperation.rightOperation == null)
+                    {
+                        leftOperation = null;
+                        rightOperation = null;
+                        sign = ' ';
+                        makeSimple();
+                    }
+                    else if (rightOperation.value == 1)
+                    {
+                        rightOperation.value = 0;
+                        sign = '+';
+                        makeSimple();
+                    }
+                    else if (rightOperation.rightOperation == null && rightOperation.variable == null
+                       && leftOperation.rightOperation != null)
+                    {
+                        leftOperation.multiplication(rightOperation.value);
+                        makeSimple();
+                    }
+                }
+
                     if (leftOperation != null)
                     {
-                        leftOperation.checkMultiplier(flag);
+                        leftOperation.checkMultiplier();
                     }
                     if (rightOperation != null)
                     {
-                        rightOperation.checkMultiplier(flag);
+                        rightOperation.checkMultiplier();
                     }
                 }
-            }
 
         /*    public void makeSimpleVar1(ref Operation op)
             {
@@ -348,18 +351,20 @@ namespace zadachka
                         {
                             leftOperation = null;
                             rightOperation = null;
+                            sign = ' ';
                         }
                         if (sign == '/')
                         {
                             leftOperation = null;
                             rightOperation = null;
                             value = 1;
+                            sign = ' ';
                         }
                         makeSimple();
                     }
                     else if (leftOperation.rightOperation != null &&
                         rightOperation.variable == leftOperation.rightOperation.variable && rightOperation.variable != null &&
-                        leftOperation.sign == '*' && leftOperation.leftOperation.value != 0)
+                        leftOperation.sign == '*' && sign == '+' && leftOperation.leftOperation.value != 0)
                     {
                         leftOperation.value = leftOperation.leftOperation.value + 1;
                         leftOperation.leftOperation = null;
@@ -367,7 +372,7 @@ namespace zadachka
                         sign = '*';
                         makeSimple();
                     }
-                    else if (leftOperation.sign == rightOperation.sign && leftOperation.sign == '*')
+                    else if (leftOperation.sign == rightOperation.sign && leftOperation.sign == '*' && (sign == '+' || sign == '-'))
                     {
                         if (rightOperation.leftOperation != null && leftOperation.leftOperation != null &&
                             rightOperation.rightOperation.variable == leftOperation.rightOperation.variable &&
@@ -423,7 +428,14 @@ namespace zadachka
                         }
                     }
                 }
-
+                if (leftOperation != null)
+                {
+                    leftOperation.simplifyVaribles();
+                }
+                if (rightOperation != null)
+                {
+                    rightOperation.simplifyVaribles();
+                }
             }
 
             
@@ -431,12 +443,7 @@ namespace zadachka
             public bool exchange()
             {
                 char bufSign;
-                bool flag = false;
-                tryMakeSimpleConstOrVar(flag);
-                if (flag)
-                {
-                    return true;
-                }
+                tryMakeSimpleConstOrVar();
                 if (leftOperation != null)
                 {
                     if (leftOperation.rightOperation != null && rightOperation != null 
@@ -486,13 +493,8 @@ namespace zadachka
                 {
                     makeSimple();
                 }
-                var flag = false;
-              //  checkMultiplier(flag);
-            //    if (flag)
-                {
-           //         makeSimple();
-                }
-                simplifyVaribles();
+                checkMultiplier();
+              //  simplifyVaribles();
             }
 
 
@@ -539,13 +541,6 @@ namespace zadachka
                 rightOperation.tryFoundVar(buffOp);
                 leftOperation = buffOp.copy();
                 leftOperation.diff();
-                /*        if (rightOperation.rightOperation == null)
-                    {
-                        rightOperation.rightOperation = new Operation();
-                    }
-                    rightOperation.rightOperation = buffOp.copy();
-                    rightOperation.cleanOperation();
-                    rightOperation.searchFunction = searchFunction; */
                     cleanOperation();
                     sign = '*';
             }
@@ -829,59 +824,6 @@ namespace zadachka
                 }
             }
 
-            /*    public void simplify()
-                {
-                    string variables = "";
-                    if (leftOperation != null)
-                    {
-                        if (leftOperation.leftOperation != null || leftOperation.rightOperation != null)
-                        {
-                            leftOperation.simplify();
-                        }
-                        else
-                        {
-                            if (leftOperation.variable != null)
-                            {
-                                variable = leftOperation.variable;
-                                leftOperation.variable = null;
-                            }
-                            if (rightOperation.variable != null)
-                            {
-                                variable = rightOperation.variable;
-                                rightOperation.variable = null;
-                            }
-                                value = calculate();
-                                leftOperation = null;
-                                rightOperation = null;
-                            return;
-                        }
-                    }
-                    if (rightOperation != null)
-                    {
-                        if (rightOperation.rightOperation != null || rightOperation.leftOperation != null)
-                        {
-                            rightOperation.simplify();
-                        }
-                        else
-                        {
-                            if (leftOperation.variable != null)
-                            {
-                                variable = leftOperation.variable;
-                                leftOperation.variable = null;
-                            }
-                            if (rightOperation.variable != null)
-                            {
-                                variable = rightOperation.variable;
-                                rightOperation.variable = null;
-                            }
-                            value = calculate();
-                                leftOperation = null;
-                                rightOperation = null;
-                            return;
-                        }
-                    } 
-                  //  createNewOperation(variables);
-                } */
 
             public void createNewOperation(string s)
             {
