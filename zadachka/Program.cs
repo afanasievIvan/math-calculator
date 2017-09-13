@@ -46,8 +46,8 @@ namespace zadachka
 
         class Operation
         {
-            public Operation leftOperation = null;
-            public Operation rightOperation = null;
+            public Operation left = null;
+            public Operation right = null;
             public Operation varOperation = null;
             public double value = 0;
             public char sign;
@@ -58,17 +58,20 @@ namespace zadachka
 
             public Operation() { }
 
+            public bool hasLeft { get { return left != null; } }
+            public bool hasRight { get { return right != null; } }
+
             public void copy(Operation original)
             {
-                if (original.leftOperation != null)
+                if (original.left != null)
                 {
-                    leftOperation = new Operation();
-                    leftOperation.copy(original.leftOperation);
+                    left = new Operation();
+                    left.copy(original.left);
                 }
-                if (original.rightOperation != null)
+                if (original.right != null)
                 {
-                    rightOperation = new Operation();
-                    rightOperation.copy(original.rightOperation);
+                    right = new Operation();
+                    right.copy(original.right);
                 }
                 Derivative = original.Derivative;
                 value = original.value;
@@ -81,33 +84,33 @@ namespace zadachka
 
             public void tryMakeSimpleConstOrVar()
             {
-                if (leftOperation != null && rightOperation != null)
+                if (left != null && right != null)
                 {
-                    if (leftOperation.variable == null && rightOperation.variable == null && leftOperation.rightOperation == null 
-                        && rightOperation.rightOperation == null)
+                    if (left.variable == null && right.variable == null && left.right == null 
+                        && right.right == null)
                     {
                         value = calculate();
-                        leftOperation = null;
-                        rightOperation = null;
+                        left = null;
+                        right = null;
                         sign = ' ';
                         searchFunction = null;
                         makeSimple();
                     }
-                    else if (leftOperation.value == 0 && leftOperation.rightOperation == null && leftOperation.variable == null)
+                    else if (left.value == 0 && left.right == null && left.variable == null)
                     {
                         if (sign == '+')
                         {
-                            var buffOp = rightOperation.copy();
-                            leftOperation = null;
-                            rightOperation = null;
+                            var buffOp = right.copy();
+                            left = null;
+                            right = null;
                             copy(buffOp);
                             makeSimple();
                         }
                         else if (sign == '-')
                         {
-                            var buffOp = rightOperation.copy();
-                            leftOperation = null;
-                            rightOperation = null;
+                            var buffOp = right.copy();
+                            left = null;
+                            right = null;
                             buffOp.changeSign();
                             copy(buffOp);
                             makeSimple();
@@ -115,27 +118,27 @@ namespace zadachka
                         else if (sign == '*')
                         {
                             value = calculate();
-                            leftOperation = null;
-                            rightOperation = null;
+                            left = null;
+                            right = null;
                             sign = ' ';
                             makeSimple();
                         }                           
                     }
-                    else if (rightOperation.value == 0 && rightOperation.rightOperation == null && rightOperation.variable == null)
+                    else if (right.value == 0 && right.right == null && right.variable == null)
                     { 
                         if (sign == '+' || sign == '-')
                         {
-                            var buffOp = leftOperation.copy();
-                            leftOperation = null;
-                            rightOperation = null;
+                            var buffOp = left.copy();
+                            left = null;
+                            right = null;
                             copy(buffOp);
                             makeSimple();
                         }
                         else if (sign == '*')
                         {
                             value = calculate();
-                            leftOperation = null;
-                            rightOperation = null;
+                            left = null;
+                            right = null;
                             sign = ' ';
                             makeSimple();
                         }
@@ -143,21 +146,21 @@ namespace zadachka
                 } 
                 else if (searchFunction != null)
                 {
-                    if (rightOperation.variable == null && rightOperation.rightOperation == null)
+                    if (right.variable == null && right.right == null)
                     {
                         value = calculate();
-                        rightOperation = null;
+                        right = null;
                         searchFunction = null;
                         makeSimple();
                     }
                 }
-                if (leftOperation != null)
+                if (left != null)
                 {
-                    leftOperation.tryMakeSimpleConstOrVar();
+                    left.tryMakeSimpleConstOrVar();
                 }
-                if (rightOperation != null)
+                if (right != null)
                 {
-                    rightOperation.tryMakeSimpleConstOrVar();
+                    right.tryMakeSimpleConstOrVar();
                 }              
             }
 
@@ -199,16 +202,16 @@ namespace zadachka
                 {
                     sign = '+';
                 }
-                if (leftOperation != null)
+                if (left != null)
                 {
-                    leftOperation.changeSign();
+                    left.changeSign();
                 }
                     else if (searchFunction != null)
                     {
-                        leftOperation = new Operation();
-                        rightOperation = new Operation();
+                        left = new Operation();
+                        right = new Operation();
                         sign = '-';
-                        rightOperation.searchFunction = searchFunction;
+                        right.searchFunction = searchFunction;
                         searchFunction = null;
                     }
                     else if (value != 0)
@@ -217,10 +220,10 @@ namespace zadachka
                     }
                     else if (variable != null)
                     {
-                        leftOperation = new Operation();
-                        rightOperation = new Operation();
+                        left = new Operation();
+                        right = new Operation();
                         sign = '-';
-                        rightOperation.variable = variable;
+                        right.variable = variable;
                         variable = null;
                     }
             }
@@ -228,45 +231,45 @@ namespace zadachka
             public void multiply(double multiplier)
             {
                 sign = '*';
-                leftOperation = new Operation();
-                leftOperation.value = multiplier;
+                left = new Operation();
+                left.value = multiplier;
             }
 
             public void multiplication(double multiplier)
             {
-                if (leftOperation != null)
+                if (left != null)
                 {
-                   leftOperation.multiplication(multiplier);
+                   left.multiplication(multiplier);
                 }
                 else if (searchFunction != null)
                 {
-                    var buffOp = rightOperation.copy();
+                    var buffOp = right.copy();
                     multiply(multiplier);
-                    rightOperation.searchFunction = searchFunction;
+                    right.searchFunction = searchFunction;
                     searchFunction = null;
-                    if (rightOperation.rightOperation == null)
+                    if (right.right == null)
                     {
-                        rightOperation.rightOperation = new Operation();
+                        right.right = new Operation();
                     }
-                    rightOperation.rightOperation = buffOp.copy();
+                    right.right = buffOp.copy();
                 }
                 else if (variable != null)
                 {
                     multiply(multiplier);
-                    rightOperation = new Operation();
-                    rightOperation.variable = variable;
+                    right = new Operation();
+                    right.variable = variable;
                     variable = null;
                 }
                 else
                 {
                     multiply(multiplier);
-                    rightOperation = new Operation();
-                    rightOperation.value = value;
+                    right = new Operation();
+                    right.value = value;
                     value = 0;
                 }
-                if (rightOperation != null && sign != '*')
+                if (right != null && sign != '*')
                 {
-                    rightOperation.multiplication(multiplier);
+                    right.multiplication(multiplier);
                 }
             }
 
@@ -274,55 +277,55 @@ namespace zadachka
             {
                 if (sign == '*')
                 {
-                    if (leftOperation.value == 0 && leftOperation.variable == null && leftOperation.rightOperation == null)
+                    if (left.value == 0 && left.variable == null && left.right == null)
                     {
-                        leftOperation = null;
-                        rightOperation = null;
+                        left = null;
+                        right = null;
                         sign = ' ';
                         makeSimple();
                     }
-                    else if (leftOperation.value == 1)
+                    else if (left.value == 1)
                     {
-                        leftOperation.value = 0;
+                        left.value = 0;
                         sign = '+';
                         makeSimple();
                     }
-                    else if (leftOperation.rightOperation == null && leftOperation.variable == null
-                    && rightOperation.rightOperation != null)
+                    else if (left.right == null && left.variable == null
+                    && right.right != null)
                     {
-                        rightOperation.multiplication(leftOperation.value);
-                        leftOperation.value = 0;
+                        right.multiplication(left.value);
+                        left.value = 0;
                         sign = '+';
                         makeSimple();
                     }
-                    else if (rightOperation.value == 0 && rightOperation.variable == null && leftOperation.rightOperation == null)
+                    else if (right.value == 0 && right.variable == null && left.right == null)
                     {
-                        leftOperation = null;
-                        rightOperation = null;
+                        left = null;
+                        right = null;
                         sign = ' ';
                         makeSimple();
                     }
-                    else if (rightOperation.value == 1)
+                    else if (right.value == 1)
                     {
-                        rightOperation.value = 0;
+                        right.value = 0;
                         sign = '+';
                         makeSimple();
                     }
-                    else if (rightOperation.rightOperation == null && rightOperation.variable == null
-                       && leftOperation.rightOperation != null)
+                    else if (right.right == null && right.variable == null
+                       && left.right != null)
                     {
-                        leftOperation.multiplication(rightOperation.value);
+                        left.multiplication(right.value);
                         makeSimple();
                     }
                 }
 
-                    if (leftOperation != null)
+                    if (left != null)
                     {
-                        leftOperation.checkMultiplier();
+                        left.checkMultiplier();
                     }
-                    if (rightOperation != null)
+                    if (right != null)
                     {
-                        rightOperation.checkMultiplier();
+                        right.checkMultiplier();
                     }
                 }
 
@@ -335,106 +338,174 @@ namespace zadachka
             }
             */
 
+            public bool isSameVar(Operation op1, Operation op2)
+            {
+                return op1.variable == op2.variable && op1.variable != "";
+            }
+
+            public void checkCommonMultiplier(Operation op)
+            {
+                if (!op.hasLeft || !op.hasRight)
+                {
+                    return;
+                }
+                if (op.left.left == null || op.left.right == null)
+                {
+                    return;
+                }
+                if (op.right.left == null || op.right.right == null)
+                {
+                    return;
+                }
+
+                var variable = "";
+                if (isSameVar(op.left.left, op.right.left))
+                {
+                    variable = op.left.left.variable;
+                }
+                if (isSameVar(op.left.left, op.right.right))
+                {
+                    variable = op.left.left.variable;
+                }
+                if (isSameVar(op.right.left, op.right.left))
+                {
+                    variable = op.left.left.variable;
+                }
+                if (isSameVar(op.right.left, op.right.right))
+                {
+                    variable = op.left.left.variable;
+                }
+
+                var newRight = new Operation();
+                var list = new List<Operation>();
+                if (op.left.left.variable != variable)
+                {
+                    list.Add(op.left.left);
+                }
+                if (op.left.right.variable != variable)
+                {
+                    list.Add(op.left.left);
+                }
+                if (op.right.left.variable != variable)
+                {
+                    list.Add(op.left.left);
+                }
+                if (op.right.right.variable != variable)
+                {
+                    list.Add(op.left.left);
+                }
+                if (list.Count == 2)
+                {
+                    newRight.left = list[0];
+                    newRight.right = list[1];
+                    newRight.sign = op.sign;
+                    op.right = newRight;
+                    op.sign = '*';
+                    op.left = new Operation();
+                    op.left.variable = variable;
+                }
+            }
+
             public void simplifyVaribles()
             {
-                if (rightOperation != null && leftOperation != null)
+                if (right != null && left != null)
                 {
-                    if (rightOperation.variable == leftOperation.variable && rightOperation.variable != null)
+                    if (right.variable == left.variable && right.variable != null)
                     {
                         if (sign == '+')
                         {
                             sign = '*';
-                            leftOperation.value = 2;
-                            leftOperation.variable = null;
+                            left.value = 2;
+                            left.variable = null;
                         }
                         if (sign == '-')
                         {
-                            leftOperation = null;
-                            rightOperation = null;
+                            left = null;
+                            right = null;
                             sign = ' ';
                         }
                         if (sign == '/')
                         {
-                            leftOperation = null;
-                            rightOperation = null;
+                            left = null;
+                            right = null;
                             value = 1;
                             sign = ' ';
                         }
                         makeSimple();
                     }
-                    else if (leftOperation.rightOperation != null &&
-                        rightOperation.variable == leftOperation.rightOperation.variable && rightOperation.variable != null &&
-                        leftOperation.sign == '*' && sign == '+' && leftOperation.leftOperation.value != 0)
+                    else if (left.right != null &&
+                        right.variable == left.right.variable && right.variable != null &&
+                        left.sign == '*' && sign == '+' && left.left.value != 0)
                     {
-                        leftOperation.value = leftOperation.leftOperation.value + 1;
-                        leftOperation.leftOperation = null;
-                        leftOperation.rightOperation = null;
+                        left.value = left.left.value + 1;
+                        left.left = null;
+                        left.right = null;
                         sign = '*';
                         makeSimple();
                     }
-                    else if (leftOperation.sign == rightOperation.sign && leftOperation.sign == '*' && (sign == '+' || sign == '-'))
+                    else if (left.sign == right.sign && left.sign == '*' && (sign == '+' || sign == '-'))
                     {
-                        if (rightOperation.leftOperation != null && leftOperation.leftOperation != null &&
-                            rightOperation.rightOperation.variable == leftOperation.rightOperation.variable &&
-                            rightOperation.rightOperation.variable != null)
+                        if (right.left != null && left.left != null &&
+                            right.right.variable == left.right.variable &&
+                            right.right.variable != null)
                         {
-                            leftOperation.rightOperation.value = rightOperation.leftOperation.value;
-                            leftOperation.rightOperation.variable = null;
-                            leftOperation.sign = sign;
+                            left.right.value = right.left.value;
+                            left.right.variable = null;
+                            left.sign = sign;
                             sign = '*';
-                            rightOperation.variable = rightOperation.rightOperation.variable;
-                            rightOperation.rightOperation = null;
-                            rightOperation.leftOperation = null;
+                            right.variable = right.right.variable;
+                            right.right = null;
+                            right.left = null;
                             makeSimple();
                         }
-                        else if (rightOperation.leftOperation != null && leftOperation.leftOperation != null &&
-                            rightOperation.leftOperation.variable == leftOperation.leftOperation.variable &&
-                            rightOperation.leftOperation.variable != null)
+                        else if (right.left != null && left.left != null &&
+                            right.left.variable == left.left.variable &&
+                            right.left.variable != null)
                         {
-                            leftOperation.leftOperation.value = rightOperation.rightOperation.value;
-                            leftOperation.leftOperation.variable = null;
-                            leftOperation.sign = sign;
+                            left.left.value = right.right.value;
+                            left.left.variable = null;
+                            left.sign = sign;
                             sign = '*';
-                            rightOperation.variable = rightOperation.leftOperation.variable;
-                            rightOperation.rightOperation = null;
-                            rightOperation.leftOperation = null;
+                            right.variable = right.left.variable;
+                            right.right = null;
+                            right.left = null;
                             makeSimple();
                         }
-                        else if (rightOperation.leftOperation != null && leftOperation.leftOperation != null &&
-                            rightOperation.rightOperation.variable == leftOperation.leftOperation.variable &&
-                            rightOperation.rightOperation.variable != null)
+                        else if (right.left != null && left.left != null &&
+                            right.right.variable == left.left.variable &&
+                            right.right.variable != null)
                         {
-                            leftOperation.leftOperation.value = rightOperation.leftOperation.value;
-                            leftOperation.leftOperation.variable = null;
-                            leftOperation.sign = sign;
+                            left.left.value = right.left.value;
+                            left.left.variable = null;
+                            left.sign = sign;
                             sign = '*';
-                            rightOperation.variable = rightOperation.rightOperation.variable;
-                            rightOperation.rightOperation = null;
-                            rightOperation.leftOperation = null;
+                            right.variable = right.right.variable;
+                            right.right = null;
+                            right.left = null;
                             makeSimple();
                         }
-                        else if (rightOperation.leftOperation != null && leftOperation.leftOperation != null &&
-                            rightOperation.leftOperation.variable == leftOperation.rightOperation.variable &&
-                            rightOperation.leftOperation.variable != null)
+                        else if (right.left != null && left.left != null &&
+                            right.left.variable == left.right.variable &&
+                            right.left.variable != null)
                         {
-                            leftOperation.rightOperation.value = rightOperation.rightOperation.value;
-                            leftOperation.rightOperation.variable = null;
-                            leftOperation.sign = sign;
+                            left.right.value = right.right.value;
+                            left.right.variable = null;
+                            left.sign = sign;
                             sign = '*';
-                            rightOperation.variable = rightOperation.leftOperation.variable;
-                            rightOperation.rightOperation = null;
-                            rightOperation.leftOperation = null;
+                            right.variable = right.left.variable;
+                            right.right = null;
+                            right.left = null;
                             makeSimple();
                         }
                     }
                 }
-                if (leftOperation != null)
+                if (left != null)
                 {
-                    leftOperation.simplifyVaribles();
+                    left.simplifyVaribles();
                 }
-                if (rightOperation != null)
+                if (right != null)
                 {
-                    rightOperation.simplifyVaribles();
+                    right.simplifyVaribles();
                 }
             }
 
@@ -444,37 +515,37 @@ namespace zadachka
             {
                 char bufSign;
                 tryMakeSimpleConstOrVar();
-                if (leftOperation != null)
+                if (left != null)
                 {
-                    if (leftOperation.rightOperation != null && rightOperation != null 
-                        && leftOperation.rightOperation.variable != null && rightOperation.variable == null)
+                    if (left.right != null && right != null 
+                        && left.right.variable != null && right.variable == null)
                     {
-                        if (checkSign(this, leftOperation) == true)
+                        if (checkSign(this, left) == true)
                         {
                             bufSign = sign;
-                            sign = leftOperation.sign;
-                            leftOperation.sign = bufSign;
-                            exchangeOperations(ref leftOperation.rightOperation, ref rightOperation);
+                            sign = left.sign;
+                            left.sign = bufSign;
+                            exchangeOperations(ref left.right, ref right);
                             return true;
                         }
                     }
 
-                    else if (leftOperation.leftOperation != null && rightOperation != null 
-                        && leftOperation.leftOperation.variable != null && rightOperation.variable == null)
+                    else if (left.left != null && right != null 
+                        && left.left.variable != null && right.variable == null)
                     {
-                        if (checkSign(this, leftOperation) == true)
+                        if (checkSign(this, left) == true)
                         {
                             //  exchangeSigns(this, leftOperation);
                             bufSign = sign;
-                            sign = leftOperation.sign;
-                            leftOperation.sign = bufSign;
-                            exchangeOperations(ref leftOperation.leftOperation, ref rightOperation);
+                            sign = left.sign;
+                            left.sign = bufSign;
+                            exchangeOperations(ref left.left, ref right);
                             return true;
                         }
                     }
                     else
                     {
-                        return leftOperation.exchange();
+                        return left.exchange();
                     }
                 }
                 return false;
@@ -483,11 +554,11 @@ namespace zadachka
             public void makeSimple()
             {
                 tryGetDiff();
-                if (sign == '-' && rightOperation != null && rightOperation.rightOperation != null)
+                if (sign == '-' && right != null && right.right != null)
                 {
                     sign = '+';
-                    rightOperation.changeSign();
-                    exchangeOperations(ref rightOperation, ref leftOperation);
+                    right.changeSign();
+                    exchangeOperations(ref right, ref left);
                 }
                 if (exchange())
                 {
@@ -500,34 +571,34 @@ namespace zadachka
 
             public void diffSUm()
             {
-                leftOperation.diff();
-                rightOperation.diff();
+                left.diff();
+                right.diff();
             }
 
             public void tryFoundVar(Operation buf)
             {
-                if (rightOperation != null)
+                if (right != null)
                 {
-                    if (rightOperation.variable != null)
+                    if (right.variable != null)
                     {
-                        rightOperation.variable = null;
-                        rightOperation = buf.copy();
+                        right.variable = null;
+                        right = buf.copy();
                     }
                     else
                     {
-                        rightOperation.tryFoundVar(buf);
+                        right.tryFoundVar(buf);
                     }
                 }
-                if (leftOperation != null)
+                if (left != null)
                 {
-                    if (leftOperation.variable != null)
+                    if (left.variable != null)
                     {
-                        leftOperation.variable = null;
-                        leftOperation = buf.copy();
+                        left.variable = null;
+                        left = buf.copy();
                     }
                     else
                     {
-                        leftOperation.tryFoundVar(buf);
+                        left.tryFoundVar(buf);
                     }
                 }
             }
@@ -535,12 +606,12 @@ namespace zadachka
             public void diffComplexFunc()
             {
                 var buffOp = new Operation();
-                buffOp = rightOperation.copy();
-                rightOperation = null;
-                rightOperation = new Operation(parser, parser.dMap[searchKey(searchFunction)]);
-                rightOperation.tryFoundVar(buffOp);
-                leftOperation = buffOp.copy();
-                leftOperation.diff();
+                buffOp = right.copy();
+                right = null;
+                right = new Operation(parser, parser.dMap[searchKey(searchFunction)]);
+                right.tryFoundVar(buffOp);
+                left = buffOp.copy();
+                left.diff();
                     cleanOperation();
                     sign = '*';
             }
@@ -548,29 +619,29 @@ namespace zadachka
             public void diffMultorDividing()
             {
                 var buffOp1 = new Operation();
-                buffOp1 = leftOperation.copy();
-                var buffOp2 = rightOperation.copy();
-                    if (leftOperation.rightOperation == null)
+                buffOp1 = left.copy();
+                var buffOp2 = right.copy();
+                    if (left.right == null)
                     {
-                        leftOperation.rightOperation = new Operation();
-                        leftOperation.leftOperation = new Operation();
+                        left.right = new Operation();
+                        left.left = new Operation();
                     }
-                leftOperation.leftOperation = buffOp1.copy();
-                leftOperation.rightOperation = buffOp2.copy();
-                leftOperation.leftOperation.diff();                    
-                    if (rightOperation.rightOperation == null)
+                left.left = buffOp1.copy();
+                left.right = buffOp2.copy();
+                left.left.diff();                    
+                    if (right.right == null)
                     {
-                        rightOperation.rightOperation = new Operation();
-                        rightOperation.leftOperation = new Operation();
+                        right.right = new Operation();
+                        right.left = new Operation();
                     }
 
-                rightOperation.leftOperation = buffOp1.copy();
-                rightOperation.rightOperation = buffOp2.copy();
-                rightOperation.rightOperation.diff();
-                leftOperation.cleanOperation();
-                rightOperation.cleanOperation();
-                leftOperation.sign = '*';
-                rightOperation.sign = '*';
+                right.left = buffOp1.copy();
+                right.right = buffOp2.copy();
+                right.right.diff();
+                left.cleanOperation();
+                right.cleanOperation();
+                left.sign = '*';
+                right.sign = '*';
             }
 
 
@@ -578,27 +649,27 @@ namespace zadachka
             {
                 if (sign == '/' || sign == ':')
                 {
-                    var buffOp1 = leftOperation.copy();
-                    var buffOp2 = rightOperation.copy();
-                    if (leftOperation.rightOperation == null)
+                    var buffOp1 = left.copy();
+                    var buffOp2 = right.copy();
+                    if (left.right == null)
                     {
-                        leftOperation.rightOperation = new Operation();
-                        leftOperation.leftOperation = new Operation();
+                        left.right = new Operation();
+                        left.left = new Operation();
                     }
-                    leftOperation.leftOperation = buffOp1.copy();
-                    leftOperation.rightOperation = buffOp2.copy();
-                    leftOperation.diffMultorDividing();
-                    leftOperation.cleanOperation();
-                    leftOperation.sign = '-';
-                    if (rightOperation.rightOperation == null)
+                    left.left = buffOp1.copy();
+                    left.right = buffOp2.copy();
+                    left.diffMultorDividing();
+                    left.cleanOperation();
+                    left.sign = '-';
+                    if (right.right == null)
                     {
-                        rightOperation.rightOperation = new Operation();
-                        rightOperation.leftOperation = new Operation();
+                        right.right = new Operation();
+                        right.left = new Operation();
                     }
-                    rightOperation.rightOperation = buffOp2.copy();
-                    rightOperation.leftOperation = rightOperation.rightOperation.copy();
-                    rightOperation.cleanOperation();
-                    rightOperation.sign = '*';
+                    right.right = buffOp2.copy();
+                    right.left = right.right.copy();
+                    right.cleanOperation();
+                    right.sign = '*';
                 } 
             }
 
@@ -636,21 +707,21 @@ namespace zadachka
             {
                 if (Derivative)
                 {
-                    rightOperation.diff();
-                    leftOperation = new Operation();
+                    right.diff();
+                    left = new Operation();
                     Derivative = false;
                     sign = '+';
 
                 }
                 else
                 {
-                    if (leftOperation != null)
+                    if (left != null)
                     {
-                        leftOperation.tryGetDiff();
+                        left.tryGetDiff();
                     }
-                    if (rightOperation != null)
+                    if (right != null)
                     {
-                        rightOperation.tryGetDiff();
+                        right.tryGetDiff();
                     }
                 }
             }
@@ -675,13 +746,13 @@ namespace zadachka
             public Operation copy()
             {
                 var result = new Operation();
-                if (leftOperation != null)
+                if (left != null)
                 {
-                    result.leftOperation = leftOperation.copy();
+                    result.left = left.copy();
                 }
-                if (rightOperation != null)
+                if (right != null)
                 {
-                    result.rightOperation = rightOperation.copy();
+                    result.right = right.copy();
                 }
                 result.Derivative = Derivative;
                 result.sign = sign;
@@ -713,9 +784,9 @@ namespace zadachka
             {
                 double l = 0;
                 Func<double, double> fun = null;
-                if (leftOperation != null)
+                if (left != null)
                 {
-                    l = leftOperation.calculate();
+                    l = left.calculate();
                 }
                 else if (searchFunction != null)
                 {
@@ -730,9 +801,9 @@ namespace zadachka
                     return value;
                 }
                 double r = 0;
-                if (rightOperation != null)
+                if (right != null)
                 {
-                    r = rightOperation.calculate();
+                    r = right.calculate();
                 }
                 else if (variable != null)
                 {
@@ -768,9 +839,9 @@ namespace zadachka
             {
                 string r = "";
                 string l = "";
-                if (leftOperation != null)
+                if (left != null)
                 {
-                    l += leftOperation.assembly();
+                    l += left.assembly();
                 }
                 
                 else if (searchFunction != null)
@@ -786,9 +857,9 @@ namespace zadachka
                 {
                     return Convert.ToString(value);
                 }
-                if (rightOperation != null)
+                if (right != null)
                 {
-                    r += rightOperation.assembly();
+                    r += right.assembly();
                 }
                 else if (variable != null)
                 {
@@ -827,13 +898,13 @@ namespace zadachka
 
             public void createNewOperation(string s)
             {
-                if (rightOperation != null)
+                if (right != null)
                 {
-                    rightOperation.createNewOperation(s);
+                    right.createNewOperation(s);
                 }
                 else
                 {
-                    rightOperation = new Operation(parser, s);
+                    right = new Operation(parser, s);
                 }
             }
 
@@ -863,14 +934,14 @@ namespace zadachka
                 if ((String.IsNullOrEmpty(exp.Substring(0, i))) == true)
                 {
                     sign = exp[i];
-                    leftOperation = new Operation(parser, "");
-                    rightOperation = new Operation(parser, exp.Substring(i + 1));
+                    left = new Operation(parser, "");
+                    right = new Operation(parser, exp.Substring(i + 1));
                 }
                 else
                 {
                     sign = exp[i];
-                    leftOperation = new Operation(parser, exp.Substring(0, i));
-                    rightOperation = new Operation(parser, exp.Substring(i + 1));
+                    left = new Operation(parser, exp.Substring(0, i));
+                    right = new Operation(parser, exp.Substring(i + 1));
                 }
             }
 
@@ -930,7 +1001,7 @@ namespace zadachka
                 if (expression[0] == 'D')
                 {
                     Derivative = true;
-                    rightOperation = new Operation(parser, expression.Substring(1));
+                    right = new Operation(parser, expression.Substring(1));
                     return true;
                 }
                 for (int i = 0; i < expression.Length; i++)
@@ -948,7 +1019,7 @@ namespace zadachka
                 }
                 if (parser.funcMap.TryGetValue(func, out searchFunction) == true)
                 {
-                    rightOperation = new Operation(parser, expression.Substring(k + 1));
+                    right = new Operation(parser, expression.Substring(k + 1));
                     return true;
                 }
                 else if (flag == true && parser.varMap.ContainsKey(func) == false)
