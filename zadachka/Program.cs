@@ -315,7 +315,10 @@ namespace zadachka
                        && left.right != null)
                     {
                         left.multiplication(right.value);
+                        right.value = 0;
+                        sign = '+';
                         makeSimple();
+
                     }
                 }
 
@@ -449,6 +452,8 @@ namespace zadachka
                             right.right.variable == left.right.variable &&
                             right.right.variable != null)
                         {
+                            left.cleanOperation();
+                            right.cleanOperation();
                             left.right.value = right.left.value;
                             left.right.variable = null;
                             left.sign = sign;
@@ -565,7 +570,7 @@ namespace zadachka
                     makeSimple();
                 }
                 checkMultiplier();
-              //  simplifyVaribles();
+                simplifyVaribles();
             }
 
 
