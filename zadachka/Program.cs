@@ -343,69 +343,80 @@ namespace zadachka
 
             public bool isSameVar(Operation op1, Operation op2)
             {
-                return op1.variable == op2.variable && op1.variable != "";
+                return op1.variable == op2.variable && op1.variable != null;
             }
 
-            public void checkCommonMultiplier(Operation op)
+            public void checkCommonMultiplier()
             {
-                if (!op.hasLeft || !op.hasRight)
+                if (hasLeft)
+                {
+                    left.checkCommonMultiplier();
+                }
+                if (hasRight)
+                {
+                    right.checkCommonMultiplier();
+                }
+                if (!hasLeft || !hasRight)
                 {
                     return;
                 }
-                if (op.left.left == null || op.left.right == null)
+                if (left.left == null || left.right == null)
                 {
                     return;
                 }
-                if (op.right.left == null || op.right.right == null)
+                if (right.left == null || right.right == null)
                 {
                     return;
                 }
-
+                if (left.sign != '*' && right.sign != '*')
+                {
+                    return;
+                }
                 var variable = "";
-                if (isSameVar(op.left.left, op.right.left))
+                if (isSameVar(left.left, right.left))
                 {
-                    variable = op.left.left.variable;
+                    variable = left.left.variable;
                 }
-                if (isSameVar(op.left.left, op.right.right))
+                if (isSameVar(left.left, right.right))
                 {
-                    variable = op.left.left.variable;
+                    variable = left.left.variable;
                 }
-                if (isSameVar(op.right.left, op.right.left))
+                if (isSameVar(left.right, right.left))
                 {
-                    variable = op.left.left.variable;
+                    variable = left.right.variable;
                 }
-                if (isSameVar(op.right.left, op.right.right))
+                if (isSameVar(left.right, right.right))
                 {
-                    variable = op.left.left.variable;
+                    variable = left.right.variable;
                 }
-
-                var newRight = new Operation();
+                var newLeft = new Operation();
                 var list = new List<Operation>();
-                if (op.left.left.variable != variable)
+                if (left.left.variable != variable)
                 {
-                    list.Add(op.left.left);
+                    list.Add(left.left);
                 }
-                if (op.left.right.variable != variable)
+                if (left.right.variable != variable)
                 {
-                    list.Add(op.left.left);
+                    list.Add(left.right);
                 }
-                if (op.right.left.variable != variable)
+                if (right.left.variable != variable)
                 {
-                    list.Add(op.left.left);
+                    list.Add(right.left);
                 }
-                if (op.right.right.variable != variable)
+                if (right.right.variable != variable)
                 {
-                    list.Add(op.left.left);
+                    list.Add(right.right);
                 }
                 if (list.Count == 2)
                 {
-                    newRight.left = list[0];
-                    newRight.right = list[1];
-                    newRight.sign = op.sign;
-                    op.right = newRight;
-                    op.sign = '*';
-                    op.left = new Operation();
-                    op.left.variable = variable;
+                    newLeft.left = list[0];
+                    newLeft.right = list[1];
+                    newLeft.sign = sign;
+                    left = newLeft;
+                    sign = '*';
+                    right = new Operation();
+                    right.variable = variable;
+                    makeSimple();
                 }
             }
 
@@ -440,6 +451,7 @@ namespace zadachka
                         right.variable == left.right.variable && right.variable != null &&
                         left.sign == '*' && sign == '+' && left.left.value != 0)
                     {
+                        left.sign = ' ';
                         left.value = left.left.value + 1;
                         left.left = null;
                         left.right = null;
@@ -467,6 +479,8 @@ namespace zadachka
                             right.left.variable == left.left.variable &&
                             right.left.variable != null)
                         {
+                            left.cleanOperation();
+                            right.cleanOperation();
                             left.left.value = right.right.value;
                             left.left.variable = null;
                             left.sign = sign;
@@ -480,6 +494,8 @@ namespace zadachka
                             right.right.variable == left.left.variable &&
                             right.right.variable != null)
                         {
+                            left.cleanOperation();
+                            right.cleanOperation();
                             left.left.value = right.left.value;
                             left.left.variable = null;
                             left.sign = sign;
@@ -493,6 +509,8 @@ namespace zadachka
                             right.left.variable == left.right.variable &&
                             right.left.variable != null)
                         {
+                            left.cleanOperation();
+                            right.cleanOperation();
                             left.right.value = right.right.value;
                             left.right.variable = null;
                             left.sign = sign;
@@ -518,8 +536,13 @@ namespace zadachka
 
             public bool exchange()
             {
+                bool r = false;
                 char bufSign;
                 tryMakeSimpleConstOrVar();
+                if (right != null && right.right != null)
+                {
+                     r = right.exchange();
+                }
                 if (left != null)
                 {
                     if (left.right != null && right != null 
@@ -550,7 +573,7 @@ namespace zadachka
                     }
                     else
                     {
-                        return left.exchange();
+                        return left.exchange() || r;
                     }
                 }
                 return false;
@@ -570,7 +593,8 @@ namespace zadachka
                     makeSimple();
                 }
                 checkMultiplier();
-                simplifyVaribles();
+               // checkCommonMultiplier();
+               // simplifyVaribles();
             }
 
 
@@ -1166,7 +1190,7 @@ namespace zadachka
             foreach (var variable in Variables)
             {
                 Console.WriteLine("enter variable " + variable);
-                var Value = Convert.ToInt32(Console.ReadLine());
+                var Value = Convert.ToDouble(Console.ReadLine());
                 parser1.varMap[variable] = Value;
             }
 
