@@ -1,3 +1,7 @@
 /.vs
 /zadachka/obj
 /zadachka/bin
+/packages
+/TestResults
+/Tests/obj
+/Tests/bin
